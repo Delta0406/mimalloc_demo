@@ -1,28 +1,18 @@
 cmake_minimum_required(VERSION 3.15)
-project(mimalloc_demo CXX)
+project(mimalloc_demo LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
-endif()
+# 添加 mimalloc 源码
+add_subdirectory(mimalloc)
+# 添加自己的 DLL
+add_subdirectory(MyDll)
+# 添加测试程序
+add_subdirectory(TestApp)
 
-# ==== 你自己的 mimalloc 路径 ====
-set(MIMALLOC_ROOT "${CMAKE_SOURCE_DIR}/mimalloc")  # 修改这里
-set(MIMALLOC_INCLUDE_DIR "${MIMALLOC_ROOT}/include")
-set(MIMALLOC_LIB_DIR "${MIMALLOC_ROOT}/build/Release")
-
-include_directories(${MIMALLOC_INCLUDE_DIR})
-link_directories(${MIMALLOC_LIB_DIR})
-
-# ==== 生成可执行文件 ====
-add_executable(mimalloc_demo main.cpp)
-
-# ==== 链接动态库 ====
-# 注意这里链接 mimalloc.dll 的 import lib
-target_link_libraries(mimalloc_demo PRIVATE mimalloc.dll.lib)
-
-if(MSVC)
-    # This ensures the linker keeps the mi_version symbol even if not used.
-    target_link_options(mimalloc_demo PRIVATE "/INCLUDE:mi_version")
-endif()
+# 所有 target 公用的 include
+include_directories(
+    ${PROJECT_SOURCE_DIR}/mimalloc/include
+    ${PROJECT_SOURCE_DIR}/MyDll/src
+)
